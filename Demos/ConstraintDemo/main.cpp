@@ -3,9 +3,11 @@
 #include "GLDebugDrawer.h"
 #include "btBulletDynamicsCommon.h"
 
+
+
+
 int main(int argc,char** argv)
 {
-
 	GLDebugDrawer	gDebugDrawer;
 
     ConstraintDemo* constraintDemo = new ConstraintDemo();
