@@ -43,6 +43,8 @@ public:
 
 	virtual ~btSoftRigidCollisionAlgorithm();
 
+	virtual void processCollision (const btCollisionProcessInfo& processInfo);
+
 	virtual void processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
 
 	virtual btScalar calculateTimeOfImpact(btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
@@ -55,6 +57,11 @@ public:
 
 	struct CreateFunc :public 	btCollisionAlgorithmCreateFunc
 	{
+		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollider* body0, const btCollider* body1)
+		{
+			return CreateCollisionAlgorithm(ci, (btCollisionObject*)body0->getCollisionObject(), (btCollisionObject*)body1->getCollisionObject());
+		}
+
 		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, btCollisionObject* body0,btCollisionObject* body1)
 		{
 			void* mem = ci.m_dispatcher1->allocateCollisionAlgorithm(sizeof(btSoftRigidCollisionAlgorithm));

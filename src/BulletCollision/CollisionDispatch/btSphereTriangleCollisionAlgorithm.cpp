@@ -21,7 +21,7 @@ subject to the following restrictions:
 #include "SphereTriangleDetector.h"
 
 
-btSphereTriangleCollisionAlgorithm::btSphereTriangleCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,btCollisionObject* col0,btCollisionObject* col1,bool swapped)
+btSphereTriangleCollisionAlgorithm::btSphereTriangleCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollider* col0,const btCollider* col1,bool swapped)
 : btActivatingCollisionAlgorithm(ci,col0,col1),
 m_ownManifold(false),
 m_manifoldPtr(mf),
@@ -29,7 +29,7 @@ m_swapped(swapped)
 {
 	if (!m_manifoldPtr)
 	{
-		m_manifoldPtr = m_dispatcher->getNewManifold(col0,col1);
+		m_manifoldPtr = m_dispatcher->getNewManifold(col0->getCollisionObject(),col1->getCollisionObject());
 		m_ownManifold = true;
 	}
 }
@@ -43,32 +43,32 @@ btSphereTriangleCollisionAlgorithm::~btSphereTriangleCollisionAlgorithm()
 	}
 }
 
-void btSphereTriangleCollisionAlgorithm::processCollision (btCollisionObject* col0,btCollisionObject* col1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btSphereTriangleCollisionAlgorithm::processCollision (const btCollisionProcessInfo& processInfo)
 {
 	if (!m_manifoldPtr)
 		return;
 
-	btCollisionObject* sphereObj = m_swapped? col1 : col0;
-	btCollisionObject* triObj = m_swapped? col0 : col1;
+	const btCollider& sphereObj = m_swapped? processInfo.m_body1 : processInfo.m_body0;
+	const btCollider& triObj = m_swapped? processInfo.m_body0 : processInfo.m_body1;
 
-	btSphereShape* sphere = (btSphereShape*)sphereObj->getCollisionShape();
-	btTriangleShape* triangle = (btTriangleShape*)triObj->getCollisionShape();
+	const btSphereShape* sphere = (const btSphereShape*)sphereObj.getCollisionShape();
+	const btTriangleShape* triangle = (const btTriangleShape*)triObj.getCollisionShape();
 	
 	/// report a contact. internally this will be kept persistent, and contact reduction is done
-	resultOut->setPersistentManifold(m_manifoldPtr);
+	processInfo.m_result->setPersistentManifold(m_manifoldPtr);
 	SphereTriangleDetector detector(sphere,triangle, m_manifoldPtr->getContactBreakingThreshold());
 	
 	btDiscreteCollisionDetectorInterface::ClosestPointInput input;
 	input.m_maximumDistanceSquared = btScalar(BT_LARGE_FLOAT);///@todo: tighter bounds
-	input.m_transformA = sphereObj->getWorldTransform();
-	input.m_transformB = triObj->getWorldTransform();
+	input.m_transformA = sphereObj.getWorldTransform();
+	input.m_transformB = triObj.getWorldTransform();
 
 	bool swapResults = m_swapped;
 
-	detector.getClosestPoints(input,*resultOut,dispatchInfo.m_debugDraw,swapResults);
+	detector.getClosestPoints(input,*processInfo.m_result,processInfo.m_dispatchInfo.m_debugDraw,swapResults);
 
 	if (m_ownManifold)
-		resultOut->refreshContactPoints();
+		processInfo.m_result->refreshContactPoints();
 	
 }
 

@@ -57,7 +57,7 @@ btConvex2dConvex2dAlgorithm::CreateFunc::~CreateFunc()
 { 
 }
 
-btConvex2dConvex2dAlgorithm::btConvex2dConvex2dAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,btCollisionObject* body0,btCollisionObject* body1,btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver* pdSolver,int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+btConvex2dConvex2dAlgorithm::btConvex2dConvex2dAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollider* body0,const btCollider* body1,btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver* pdSolver,int numPerturbationIterations, int minimumPointsPerturbationThreshold)
 : btActivatingCollisionAlgorithm(ci,body0,body1),
 m_simplexSolver(simplexSolver),
 m_pdSolver(pdSolver),
@@ -96,23 +96,23 @@ extern btScalar gContactBreakingThreshold;
 //
 // Convex-Convex collision algorithm
 //
-void btConvex2dConvex2dAlgorithm ::processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btConvex2dConvex2dAlgorithm ::processCollision (const btCollisionProcessInfo& processInfo)
 {
 
 	if (!m_manifoldPtr)
 	{
 		//swapped?
-		m_manifoldPtr = m_dispatcher->getNewManifold(body0,body1);
+		m_manifoldPtr = processInfo.m_dispatcher->getNewManifold(processInfo.m_body0.getCollisionObject(), processInfo.m_body1.getCollisionObject());
 		m_ownManifold = true;
 	}
-	resultOut->setPersistentManifold(m_manifoldPtr);
+	processInfo.m_result->setPersistentManifold(m_manifoldPtr);
 
 	//comment-out next line to test multi-contact generation
 	//resultOut->getPersistentManifold()->clearManifold();
 
 
-	btConvexShape* min0 = static_cast<btConvexShape*>(body0->getCollisionShape());
-	btConvexShape* min1 = static_cast<btConvexShape*>(body1->getCollisionShape());
+	const btConvexShape* min0 = static_cast<const btConvexShape*>(processInfo.m_body0.getCollisionShape());
+	const btConvexShape* min1 = static_cast<const btConvexShape*>(processInfo.m_body1.getCollisionShape());
 
 	btVector3  normalOnB;
 	btVector3  pointOnBWorld;
@@ -132,11 +132,11 @@ void btConvex2dConvex2dAlgorithm ::processCollision (btCollisionObject* body0,bt
 			input.m_maximumDistanceSquared*= input.m_maximumDistanceSquared;
 		}
 
-		input.m_stackAlloc = dispatchInfo.m_stackAllocator;
-		input.m_transformA = body0->getWorldTransform();
-		input.m_transformB = body1->getWorldTransform();
+		input.m_stackAlloc = processInfo.m_dispatchInfo.m_stackAllocator;
+		input.m_transformA = processInfo.m_body0.getWorldTransform();
+		input.m_transformB = processInfo.m_body1.getWorldTransform();
 
-		gjkPairDetector.getClosestPoints(input,*resultOut,dispatchInfo.m_debugDraw);
+		gjkPairDetector.getClosestPoints(input, *processInfo.m_result,processInfo.m_dispatchInfo.m_debugDraw);
 
 		btVector3 v0,v1;
 		btVector3 sepNormalWorldSpace;
@@ -145,7 +145,7 @@ void btConvex2dConvex2dAlgorithm ::processCollision (btCollisionObject* body0,bt
 
 	if (m_ownManifold)
 	{
-		resultOut->refreshContactPoints();
+		processInfo.m_result->refreshContactPoints();
 	}
 
 }

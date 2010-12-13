@@ -21,6 +21,10 @@ subject to the following restrictions:
 
 
 
+void SpuContactManifoldCollisionAlgorithm::processCollision (const btCollisionProcessInfo& processInfo)
+{
+	btAssert(0);
+}
 
 void SpuContactManifoldCollisionAlgorithm::processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
 {

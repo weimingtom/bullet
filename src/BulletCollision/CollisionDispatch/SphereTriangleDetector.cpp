@@ -19,7 +19,7 @@ subject to the following restrictions:
 #include "BulletCollision/CollisionShapes/btSphereShape.h"
 
 
-SphereTriangleDetector::SphereTriangleDetector(btSphereShape* sphere,btTriangleShape* triangle,btScalar contactBreakingThreshold)
+SphereTriangleDetector::SphereTriangleDetector(const btSphereShape* sphere, const btTriangleShape* triangle,btScalar contactBreakingThreshold)
 :m_sphere(sphere),
 m_triangle(triangle),
 m_contactBreakingThreshold(contactBreakingThreshold)

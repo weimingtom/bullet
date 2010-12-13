@@ -24,7 +24,7 @@ btActivatingCollisionAlgorithm::btActivatingCollisionAlgorithm (const btCollisio
 //m_colObj1(0)
 {
 }
-btActivatingCollisionAlgorithm::btActivatingCollisionAlgorithm (const btCollisionAlgorithmConstructionInfo& ci, btCollisionObject* colObj0,btCollisionObject* colObj1)
+btActivatingCollisionAlgorithm::btActivatingCollisionAlgorithm (const btCollisionAlgorithmConstructionInfo& ci, const btCollider* colObj0,const btCollider* colObj1)
 :btCollisionAlgorithm(ci)
 //,
 //m_colObj0(0),

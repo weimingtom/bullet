@@ -18,14 +18,14 @@ subject to the following restrictions:
 #include "BulletCollision/CollisionShapes/btSphereShape.h"
 #include "BulletCollision/CollisionDispatch/btCollisionObject.h"
 
-btSphereSphereCollisionAlgorithm::btSphereSphereCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,btCollisionObject* col0,btCollisionObject* col1)
+btSphereSphereCollisionAlgorithm::btSphereSphereCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollider* col0,const btCollider* col1)
 : btActivatingCollisionAlgorithm(ci,col0,col1),
 m_ownManifold(false),
 m_manifoldPtr(mf)
 {
 	if (!m_manifoldPtr)
 	{
-		m_manifoldPtr = m_dispatcher->getNewManifold(col0,col1);
+		m_manifoldPtr = m_dispatcher->getNewManifold(col0->getCollisionObject(),col1->getCollisionObject());
 		m_ownManifold = true;
 	}
 }
@@ -39,19 +39,17 @@ btSphereSphereCollisionAlgorithm::~btSphereSphereCollisionAlgorithm()
 	}
 }
 
-void btSphereSphereCollisionAlgorithm::processCollision (btCollisionObject* col0,btCollisionObject* col1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btSphereSphereCollisionAlgorithm::processCollision (const btCollisionProcessInfo& processInfo)
 {
-	(void)dispatchInfo;
-
 	if (!m_manifoldPtr)
 		return;
 
-	resultOut->setPersistentManifold(m_manifoldPtr);
+	processInfo.m_result->setPersistentManifold(m_manifoldPtr);
 
-	btSphereShape* sphere0 = (btSphereShape*)col0->getCollisionShape();
-	btSphereShape* sphere1 = (btSphereShape*)col1->getCollisionShape();
+	const btSphereShape* sphere0 = (const btSphereShape*)processInfo.m_body0.getCollisionShape();
+	const btSphereShape* sphere1 = (const btSphereShape*)processInfo.m_body1.getCollisionShape();
 
-	btVector3 diff = col0->getWorldTransform().getOrigin()-  col1->getWorldTransform().getOrigin();
+	btVector3 diff = processInfo.m_body0.getWorldTransform().getOrigin() - processInfo.m_body1.getWorldTransform().getOrigin();
 	btScalar len = diff.length();
 	btScalar radius0 = sphere0->getRadius();
 	btScalar radius1 = sphere1->getRadius();
@@ -64,7 +62,7 @@ void btSphereSphereCollisionAlgorithm::processCollision (btCollisionObject* col0
 	if ( len > (radius0+radius1))
 	{
 #ifndef CLEAR_MANIFOLD
-		resultOut->refreshContactPoints();
+		processInfo.m_result->refreshContactPoints();
 #endif //CLEAR_MANIFOLD
 		return;
 	}
@@ -78,17 +76,17 @@ void btSphereSphereCollisionAlgorithm::processCollision (btCollisionObject* col0
 	}
 
 	///point on A (worldspace)
-	///btVector3 pos0 = col0->getWorldTransform().getOrigin() - radius0 * normalOnSurfaceB;
+	///btVector3 pos0 = processInfo.m_body0.getWorldTransform().getOrigin() - radius0 * normalOnSurfaceB;
 	///point on B (worldspace)
-	btVector3 pos1 = col1->getWorldTransform().getOrigin() + radius1* normalOnSurfaceB;
+	btVector3 pos1 = processInfo.m_body1.getWorldTransform().getOrigin() + radius1* normalOnSurfaceB;
 
 	/// report a contact. internally this will be kept persistent, and contact reduction is done
 	
 	
-	resultOut->addContactPoint(normalOnSurfaceB,pos1,dist);
+	processInfo.m_result->addContactPoint(normalOnSurfaceB,pos1,dist);
 
 #ifndef CLEAR_MANIFOLD
-	resultOut->refreshContactPoints();
+	processInfo.m_result->refreshContactPoints();
 #endif //CLEAR_MANIFOLD
 
 }

@@ -48,6 +48,8 @@ public:
 
 	virtual ~btHfFluidBuoyantShapeCollisionAlgorithm();
 
+	virtual void processCollision (const btCollisionProcessInfo& processInfo);
+
 	virtual void processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
 
 	virtual btScalar calculateTimeOfImpact(btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);

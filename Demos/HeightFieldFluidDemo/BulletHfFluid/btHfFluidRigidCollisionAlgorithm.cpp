@@ -30,15 +30,15 @@ btHfFluidRigidCollisionAlgorithm::~btHfFluidRigidCollisionAlgorithm()
 {
 }
 
-btHfFluidRigidCollisionAlgorithm::btHfFluidRigidCollisionAlgorithm(const btCollisionAlgorithmConstructionInfo& ci,btCollisionObject* col0,btCollisionObject* col1, bool isSwapped)
+btHfFluidRigidCollisionAlgorithm::btHfFluidRigidCollisionAlgorithm(const btCollisionAlgorithmConstructionInfo& ci,const btCollider* col0,const btCollider* col1, bool isSwapped)
 : btCollisionAlgorithm(ci), m_isSwapped(isSwapped), 
 	m_convexTrianglecallback(ci.m_dispatcher1, col0, col1, !isSwapped) // we flip the isSwapped because we are hf fluid vs. convex and callback expects convex vs. concave
 {
 	m_manifoldPtr = m_convexTrianglecallback.m_manifoldPtr;
 	if (m_isSwapped)
 	{
-		m_hfFluid = static_cast<btHfFluid*>(col1);
-		m_rigidCollisionObject = static_cast<btCollisionObject*>(col0);
+		m_hfFluid = static_cast<const btHfFluid*>(col1->getCollisionObject());
+		m_rigidCollisionObject = static_cast<btCollisionObject*>(col0->getCollisionObject());
 		m_manifoldPtr->setBodies(m_hfFluid,m_rigidCollisionObject);
 	} else {
 		m_hfFluid = static_cast<btHfFluid*>(col0);

@@ -1000,12 +1000,15 @@ struct btSingleContactCallback : public btBroadphaseAabbCallback
 		//only perform raycast if filterMask matches
 		if(m_resultCallback.needsCollision(collisionObject->getBroadphaseHandle())) 
 		{
-			btCollisionAlgorithm* algorithm = m_world->getDispatcher()->findAlgorithm(m_collisionObject,collisionObject);
+			btCollider collider(0, m_collisionObject->getCollisionShape(), m_collisionObject, m_collisionObject->getWorldTransform() );
+			btCollider otherCollider(0, collisionObject->getCollisionShape(), collisionObject, collisionObject->getWorldTransform() );
+			btCollisionAlgorithm* algorithm = m_world->getDispatcher()->findAlgorithm(&collider, &otherCollider);
 			if (algorithm)
 			{
 				btBridgedManifoldResult contactPointResult(m_collisionObject,collisionObject, m_resultCallback);
 				//discrete collision detection query
-				algorithm->processCollision(m_collisionObject,collisionObject, m_world->getDispatchInfo(),&contactPointResult);
+				btCollisionProcessInfo collisionProcessInfo(collider, otherCollider, m_world->getDispatchInfo(), &contactPointResult, m_world->getDispatcher());
+				algorithm->processCollision(collisionProcessInfo);
 
 				algorithm->~btCollisionAlgorithm();
 				m_world->getDispatcher()->freeCollisionAlgorithm(algorithm);
@@ -1032,12 +1035,15 @@ void	btCollisionWorld::contactTest( btCollisionObject* colObj, ContactResultCall
 ///it reports one or more contact points (including the one with deepest penetration)
 void	btCollisionWorld::contactPairTest(btCollisionObject* colObjA, btCollisionObject* colObjB, ContactResultCallback& resultCallback)
 {
-	btCollisionAlgorithm* algorithm = getDispatcher()->findAlgorithm(colObjA,colObjB);
+	btCollider colliderA(0, colObjA->getCollisionShape(), colObjA, colObjA->getWorldTransform() );
+	btCollider colliderB(0, colObjB->getCollisionShape(), colObjB, colObjB->getWorldTransform() );
+	btCollisionAlgorithm* algorithm = getDispatcher()->findAlgorithm(&colliderA, &colliderB);
 	if (algorithm)
 	{
 		btBridgedManifoldResult contactPointResult(colObjA,colObjB, resultCallback);
 		//discrete collision detection query
-		algorithm->processCollision(colObjA,colObjB, getDispatchInfo(),&contactPointResult);
+		btCollisionProcessInfo collisionProcessInfo(colliderA, colliderB, getDispatchInfo(), &contactPointResult, getDispatcher());
+		algorithm->processCollision(collisionProcessInfo);
 
 		algorithm->~btCollisionAlgorithm();
 		getDispatcher()->freeCollisionAlgorithm(algorithm);

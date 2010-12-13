@@ -80,8 +80,8 @@ protected:
 	int				m_islandTag1;
 	int				m_companionId;
 
-	int				m_activationState1;
-	btScalar			m_deactivationTime;
+	mutable int		m_activationState1;
+	mutable btScalar		m_deactivationTime;
 
 	btScalar		m_friction;
 	btScalar		m_restitution;
@@ -105,7 +105,7 @@ protected:
 	/// If some object should have elaborate collision filtering by sub-classes
 	int			m_checkCollideWith;
 
-	virtual bool	checkCollideWithOverride(btCollisionObject* /* co */)
+	virtual bool	checkCollideWithOverride(const btCollisionObject* /* co */) const
 	{
 		return true;
 	}
@@ -239,7 +239,7 @@ public:
 
 	SIMD_FORCE_INLINE	int	getActivationState() const { return m_activationState1;}
 	
-	void setActivationState(int newState);
+	void setActivationState(int newState) const;
 
 	void	setDeactivationTime(btScalar time)
 	{
@@ -252,7 +252,7 @@ public:
 
 	void forceActivationState(int newState);
 
-	void	activate(bool forceActivation = false);
+	void	activate(bool forceActivation = false) const;
 
 	SIMD_FORCE_INLINE bool isActive() const
 	{
@@ -433,7 +433,7 @@ public:
 	}
 
 
-	inline bool checkCollideWith(btCollisionObject* co)
+	inline bool checkCollideWith(const btCollisionObject* co) const
 	{
 		if (m_checkCollideWith)
 			return checkCollideWithOverride(co);

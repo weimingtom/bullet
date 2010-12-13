@@ -65,9 +65,9 @@ protected:
 
 
 	//! Creates a new contact point
-	SIMD_FORCE_INLINE btPersistentManifold* newContactManifold(btCollisionObject* body0,btCollisionObject* body1)
+	SIMD_FORCE_INLINE btPersistentManifold* newContactManifold(const btCollider* body0,const btCollider* body1)
 	{
-		m_manifoldPtr = m_dispatcher->getNewManifold(body0,body1);
+		m_manifoldPtr = m_dispatcher->getNewManifold(body0->getCollisionObject(),body1->getCollisionObject());
 		return m_manifoldPtr;
 	}
 
@@ -106,7 +106,7 @@ protected:
 
 
 	// Call before process collision
-	SIMD_FORCE_INLINE void checkManifold(btCollisionObject* body0,btCollisionObject* body1)
+	SIMD_FORCE_INLINE void checkManifold(const btCollider* body0,const btCollider* body1)
 	{
 		if(getLastManifold() == 0)
 		{
@@ -117,7 +117,7 @@ protected:
 	}
 
 	// Call before process collision
-	SIMD_FORCE_INLINE btCollisionAlgorithm * newAlgorithm(btCollisionObject* body0,btCollisionObject* body1)
+	SIMD_FORCE_INLINE btCollisionAlgorithm * newAlgorithm(const btCollider* body0,const btCollider* body1)
 	{
 		checkManifold(body0,body1);
 
@@ -127,7 +127,7 @@ protected:
 	}
 
 	// Call before process collision
-	SIMD_FORCE_INLINE void checkConvexAlgorithm(btCollisionObject* body0,btCollisionObject* body1)
+	SIMD_FORCE_INLINE void checkConvexAlgorithm(const btCollider* body0,const btCollider* body1)
 	{
 		if(m_convex_algorithm) return;
 		m_convex_algorithm = newAlgorithm(body0,body1);
@@ -136,8 +136,8 @@ protected:
 
 
 
-	void addContactPoint(btCollisionObject * body0,
-					btCollisionObject * body1,
+	void addContactPoint(const btCollider * body0,
+					const btCollider * body1,
 					const btVector3 & point,
 					const btVector3 & normal,
 					btScalar distance);
@@ -145,62 +145,72 @@ protected:
 //! Collision routines
 //!@{
 
-	void collide_gjk_triangles(btCollisionObject * body0,
-				  btCollisionObject * body1,
-				  btGImpactMeshShapePart * shape0,
-				  btGImpactMeshShapePart * shape1,
-				  const int * pairs, int pair_count);
+	void collide_gjk_triangles(
+		btDispatcher* dispatcher,
+		const btCollider* body0,
+		const btCollider* body1,
+		const btGImpactMeshShapePart* shape0,
+		const btGImpactMeshShapePart* shape1,
+		const int * pairs, int pair_count
+	);
 
-	void collide_sat_triangles(btCollisionObject * body0,
-					  btCollisionObject * body1,
-					  btGImpactMeshShapePart * shape0,
-					  btGImpactMeshShapePart * shape1,
-					  const int * pairs, int pair_count);
-
-
-
+	void collide_sat_triangles(
+		btDispatcher* dispatcher,
+		const btCollider* body0,
+		const btCollider* body1,
+		const btGImpactMeshShapePart* shape0,
+		const btGImpactMeshShapePart* shape1,
+		const int * pairs, int pair_count
+	);
 
 	void shape_vs_shape_collision(
-					  btCollisionObject * body0,
-					  btCollisionObject * body1,
-					  btCollisionShape * shape0,
-					  btCollisionShape * shape1);
+		btDispatcher* dispatcher,
+		const btCollider* body0,
+		const btCollider* body1,
+		const btCollisionShape* shape0,
+		const btCollisionShape* shape1
+	);
 
-	void convex_vs_convex_collision(btCollisionObject * body0,
-					  btCollisionObject * body1,
-					  btCollisionShape * shape0,
-					  btCollisionShape * shape1);
-
-
+	void convex_vs_convex_collision(
+		btDispatcher* dispatcher,
+		const btCollider* body0,
+		const btCollider* body1,
+		const btCollisionShape* shape0,
+		const btCollisionShape* shape1
+	);
 
 	void gimpact_vs_gimpact_find_pairs(
-					  const btTransform & trans0,
-					  const btTransform & trans1,
-					  btGImpactShapeInterface * shape0,
-					  btGImpactShapeInterface * shape1,btPairSet & pairset);
+		btDispatcher* dispatcher,
+		const btTransform & trans0,
+		const btTransform & trans1,
+		const btGImpactShapeInterface * shape0,
+		const btGImpactShapeInterface * shape1,
+		btPairSet & pairset
+	);
 
 	void gimpact_vs_shape_find_pairs(
-					  const btTransform & trans0,
-					  const btTransform & trans1,
-					  btGImpactShapeInterface * shape0,
-					  btCollisionShape * shape1,
-					  btAlignedObjectArray<int> & collided_primitives);
-
+		const btTransform& trans0,
+		const btTransform& trans1,
+		const btGImpactShapeInterface* shape0,
+		const btCollisionShape* shape1,
+		btAlignedObjectArray<int>& collided_primitives
+	);
 
 	void gimpacttrimeshpart_vs_plane_collision(
-					  btCollisionObject * body0,
-					  btCollisionObject * body1,
-					  btGImpactMeshShapePart * shape0,
-					  btStaticPlaneShape * shape1,bool swapped);
-
+		const btCollider* body0,
+		const btCollider* body1,
+		const btGImpactMeshShapePart* shape0,
+		const btStaticPlaneShape* shape1,
+		bool swapped
+	);
 
 public:
 
-	btGImpactCollisionAlgorithm( const btCollisionAlgorithmConstructionInfo& ci,btCollisionObject* body0,btCollisionObject* body1);
+	btGImpactCollisionAlgorithm( const btCollisionAlgorithmConstructionInfo& ci,const btCollider* body0,const btCollider* body1);
 
 	virtual ~btGImpactCollisionAlgorithm();
 
-	virtual void processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
+	virtual void processCollision (const btCollisionProcessInfo& processInfo);
 
 	btScalar	calculateTimeOfImpact(btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
 
@@ -213,7 +223,7 @@ public:
 
 	struct CreateFunc :public 	btCollisionAlgorithmCreateFunc
 	{
-		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, btCollisionObject* body0,btCollisionObject* body1)
+		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollider* body0,const btCollider* body1)
 		{
 			void* mem = ci.m_dispatcher1->allocateCollisionAlgorithm(sizeof(btGImpactCollisionAlgorithm));
 			return new(mem) btGImpactCollisionAlgorithm(ci,body0,body1);
@@ -236,29 +246,40 @@ public:
 	*/
 
 
-	void gimpact_vs_gimpact(btCollisionObject * body0,
-					  btCollisionObject * body1,
-					  btGImpactShapeInterface * shape0,
-					  btGImpactShapeInterface * shape1);
+	void gimpact_vs_gimpact(
+		btDispatcher* dispatcher,
+		const btCollider* body0,
+		const btCollider* body1,
+		const btGImpactShapeInterface* shape0,
+		const btGImpactShapeInterface* shape1
+	);
 
-	void gimpact_vs_shape(btCollisionObject * body0,
-					  btCollisionObject * body1,
-					  btGImpactShapeInterface * shape0,
-					  btCollisionShape * shape1,bool swapped);
+	void gimpact_vs_shape(
+		btDispatcher* dispatcher,
+		const btCollider* body0,
+		const btCollider* body1,
+		const btGImpactShapeInterface* shape0,
+		const btCollisionShape* shape1,
+		bool swapped
+	);
 
-	void gimpact_vs_compoundshape(btCollisionObject * body0,
-					  btCollisionObject * body1,
-					  btGImpactShapeInterface * shape0,
-					  btCompoundShape * shape1,bool swapped);
+	void gimpact_vs_compoundshape(
+		btDispatcher* dispatcher,
+		const btCollider* body0,
+		const btCollider* body1,
+		const btGImpactShapeInterface* shape0,
+		const btCompoundShape* shape1,
+		bool swapped
+	);
 
 	void gimpact_vs_concave(
-					  btCollisionObject * body0,
-					  btCollisionObject * body1,
-					  btGImpactShapeInterface * shape0,
-					  btConcaveShape * shape1,bool swapped);
-
-
-
+		btDispatcher* dispatcher,
+		const btCollider* body0,
+		const btCollider* body1,
+		const btGImpactShapeInterface* shape0,
+		const btConcaveShape* shape1,
+		bool swapped
+	);
 
 		/// Accessor/Mutator pairs for Part and triangleID
     void 	setFace0(int value) 

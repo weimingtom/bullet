@@ -32,6 +32,11 @@ btSoftSoftCollisionAlgorithm::~btSoftSoftCollisionAlgorithm()
 {
 }
 
+void btSoftSoftCollisionAlgorithm::processCollision (const btCollisionProcessInfo& processInfo)
+{
+	processCollision((btCollisionObject*)processInfo.m_body0.getCollisionObject(),(btCollisionObject*)processInfo.m_body1.getCollisionObject(),processInfo.m_dispatchInfo,processInfo.m_result);
+}
+
 void btSoftSoftCollisionAlgorithm::processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& /*dispatchInfo*/,btManifoldResult* /*resultOut*/)
 {
 	btSoftBody* soft0 =	(btSoftBody*)body0;

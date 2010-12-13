@@ -22,7 +22,7 @@ btEmptyAlgorithm::btEmptyAlgorithm(const btCollisionAlgorithmConstructionInfo& c
 {
 }
 
-void btEmptyAlgorithm::processCollision (btCollisionObject* ,btCollisionObject* ,const btDispatcherInfo& ,btManifoldResult* )
+void btEmptyAlgorithm::processCollision (const btCollisionProcessInfo& processInfo)
 {
 }
 

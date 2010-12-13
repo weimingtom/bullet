@@ -155,7 +155,8 @@ void customNearCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& 
 			//dispatcher will keep algorithms persistent in the collision pair
 			if (!collisionPair.m_algorithm)
 			{
-				collisionPair.m_algorithm = dispatcher.findAlgorithm(colObj0,colObj1);
+				btAssert(0);
+				collisionPair.m_algorithm = 0;//dispatcher.findAlgorithm(colObj0,colObj1);
 			}
 
 			if (collisionPair.m_algorithm)
@@ -165,7 +166,7 @@ void customNearCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& 
 				if (dispatchInfo.m_dispatchFunc == 		btDispatcherInfo::DISPATCH_DISCRETE)
 				{
 					//discrete collision detection query
-					collisionPair.m_algorithm->processCollision(colObj0,colObj1,dispatchInfo,&contactPointResult);
+					//collisionPair.m_algorithm->processCollision(colObj0,colObj1,dispatchInfo,&contactPointResult);
 				} else
 				{
 					//continuous collision detection query, time of impact (toi)

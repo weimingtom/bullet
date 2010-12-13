@@ -22,7 +22,7 @@ subject to the following restrictions:
 
 //#include <stdio.h>
 
-btConvexPlaneCollisionAlgorithm::btConvexPlaneCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,btCollisionObject* col0,btCollisionObject* col1, bool isSwapped, int numPerturbationIterations,int minimumPointsPerturbationThreshold)
+btConvexPlaneCollisionAlgorithm::btConvexPlaneCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollider* col0,const btCollider* col1, bool isSwapped, int numPerturbationIterations,int minimumPointsPerturbationThreshold)
 : btCollisionAlgorithm(ci),
 m_ownManifold(false),
 m_manifoldPtr(mf),
@@ -30,12 +30,12 @@ m_isSwapped(isSwapped),
 m_numPerturbationIterations(numPerturbationIterations),
 m_minimumPointsPerturbationThreshold(minimumPointsPerturbationThreshold)
 {
-	btCollisionObject* convexObj = m_isSwapped? col1 : col0;
-	btCollisionObject* planeObj = m_isSwapped? col0 : col1;
+	const btCollider* convexObj = m_isSwapped? col1 : col0;
+	const btCollider* planeObj = m_isSwapped? col0 : col1;
 
-	if (!m_manifoldPtr && m_dispatcher->needsCollision(convexObj,planeObj))
+	if (!m_manifoldPtr && m_dispatcher->needsCollision(convexObj->getCollisionObject(),planeObj->getCollisionObject()))
 	{
-		m_manifoldPtr = m_dispatcher->getNewManifold(convexObj,planeObj);
+		m_manifoldPtr = m_dispatcher->getNewManifold(convexObj->getCollisionObject(),planeObj->getCollisionObject());
 		m_ownManifold = true;
 	}
 }
@@ -50,25 +50,25 @@ btConvexPlaneCollisionAlgorithm::~btConvexPlaneCollisionAlgorithm()
 	}
 }
 
-void btConvexPlaneCollisionAlgorithm::collideSingleContact (const btQuaternion& perturbeRot, btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btConvexPlaneCollisionAlgorithm::collideSingleContact (const btQuaternion& perturbeRot, const btCollider& body0,const btCollider& body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
 {
-    btCollisionObject* convexObj = m_isSwapped? body1 : body0;
-	btCollisionObject* planeObj = m_isSwapped? body0: body1;
+    const btCollider& convexObj = m_isSwapped? body1 : body0;
+	const btCollider& planeObj = m_isSwapped? body0: body1;
 
-	btConvexShape* convexShape = (btConvexShape*) convexObj->getCollisionShape();
-	btStaticPlaneShape* planeShape = (btStaticPlaneShape*) planeObj->getCollisionShape();
+	const btConvexShape* convexShape = (const btConvexShape*) convexObj.getCollisionShape();
+	const btStaticPlaneShape* planeShape = (const btStaticPlaneShape*) planeObj.getCollisionShape();
 
     bool hasCollision = false;
 	const btVector3& planeNormal = planeShape->getPlaneNormal();
 	const btScalar& planeConstant = planeShape->getPlaneConstant();
 	
-	btTransform convexWorldTransform = convexObj->getWorldTransform();
+	btTransform convexWorldTransform = convexObj.getWorldTransform();
 	btTransform convexInPlaneTrans;
-	convexInPlaneTrans= planeObj->getWorldTransform().inverse() * convexWorldTransform;
+	convexInPlaneTrans= planeObj.getWorldTransform().inverse() * convexWorldTransform;
 	//now perturbe the convex-world transform
 	convexWorldTransform.getBasis()*=btMatrix3x3(perturbeRot);
 	btTransform planeInConvex;
-	planeInConvex= convexWorldTransform.inverse() * planeObj->getWorldTransform();
+	planeInConvex= convexWorldTransform.inverse() * planeObj.getWorldTransform();
 	
 	btVector3 vtx = convexShape->localGetSupportingVertex(planeInConvex.getBasis()*-planeNormal);
 
@@ -76,31 +76,30 @@ void btConvexPlaneCollisionAlgorithm::collideSingleContact (const btQuaternion& 
 	btScalar distance = (planeNormal.dot(vtxInPlane) - planeConstant);
 
 	btVector3 vtxInPlaneProjected = vtxInPlane - distance*planeNormal;
-	btVector3 vtxInPlaneWorld = planeObj->getWorldTransform() * vtxInPlaneProjected;
+	btVector3 vtxInPlaneWorld = planeObj.getWorldTransform() * vtxInPlaneProjected;
 
 	hasCollision = distance < m_manifoldPtr->getContactBreakingThreshold();
 	resultOut->setPersistentManifold(m_manifoldPtr);
 	if (hasCollision)
 	{
 		/// report a contact. internally this will be kept persistent, and contact reduction is done
-		btVector3 normalOnSurfaceB = planeObj->getWorldTransform().getBasis() * planeNormal;
+		btVector3 normalOnSurfaceB = planeObj.getWorldTransform().getBasis() * planeNormal;
 		btVector3 pOnB = vtxInPlaneWorld;
 		resultOut->addContactPoint(normalOnSurfaceB,pOnB,distance);
 	}
 }
 
 
-void btConvexPlaneCollisionAlgorithm::processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btConvexPlaneCollisionAlgorithm::processCollision (const btCollisionProcessInfo& processInfo)
 {
-	(void)dispatchInfo;
 	if (!m_manifoldPtr)
 		return;
 
-    btCollisionObject* convexObj = m_isSwapped? body1 : body0;
-	btCollisionObject* planeObj = m_isSwapped? body0: body1;
+    const btCollider& convexObj = m_isSwapped? processInfo.m_body1 : processInfo.m_body0;
+	const btCollider& planeObj = m_isSwapped? processInfo.m_body0: processInfo.m_body1;
 
-	btConvexShape* convexShape = (btConvexShape*) convexObj->getCollisionShape();
-	btStaticPlaneShape* planeShape = (btStaticPlaneShape*) planeObj->getCollisionShape();
+	const btConvexShape* convexShape = (const btConvexShape*) convexObj.getCollisionShape();
+	const btStaticPlaneShape* planeShape = (const btStaticPlaneShape*) planeObj.getCollisionShape();
 
     
 	const btVector3& planeNormal = planeShape->getPlaneNormal();
@@ -109,10 +108,16 @@ void btConvexPlaneCollisionAlgorithm::processCollision (btCollisionObject* body0
 	//first perform a collision query with the non-perturbated collision objects
 	{
 		btQuaternion rotq(0,0,0,1);
-		collideSingleContact(rotq,body0,body1,dispatchInfo,resultOut);
+		collideSingleContact(
+			rotq,
+			processInfo.m_body0,
+			processInfo.m_body1,
+			processInfo.m_dispatchInfo,
+			processInfo.m_result
+		);
 	}
 
-	if (resultOut->getPersistentManifold()->getNumContacts()<m_minimumPointsPerturbationThreshold)
+	if (processInfo.m_result->getPersistentManifold()->getNumContacts()<m_minimumPointsPerturbationThreshold)
 	{
 		btVector3 v0,v1;
 		btPlaneSpace1(planeNormal,v0,v1);
@@ -130,7 +135,13 @@ void btConvexPlaneCollisionAlgorithm::processCollision (btCollisionObject* body0
 		{
 			btScalar iterationAngle = i*(SIMD_2_PI/btScalar(m_numPerturbationIterations));
 			btQuaternion rotq(planeNormal,iterationAngle);
-			collideSingleContact(rotq.inverse()*perturbeRot*rotq,body0,body1,dispatchInfo,resultOut);
+			collideSingleContact(
+				rotq.inverse() * perturbeRot * rotq,
+				processInfo.m_body0,
+				processInfo.m_body1,
+				processInfo.m_dispatchInfo,
+				processInfo.m_result
+			);
 		}
 	}
 
@@ -138,7 +149,7 @@ void btConvexPlaneCollisionAlgorithm::processCollision (btCollisionObject* body0
 	{
 		if (m_manifoldPtr->getNumContacts())
 		{
-			resultOut->refreshContactPoints();
+			processInfo.m_result->refreshContactPoints();
 		}
 	}
 }

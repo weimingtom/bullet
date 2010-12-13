@@ -50,6 +50,11 @@ btSoftRigidCollisionAlgorithm::~btSoftRigidCollisionAlgorithm()
 
 #include <stdio.h>
 
+void btSoftRigidCollisionAlgorithm::processCollision (const btCollisionProcessInfo& processInfo)
+{
+	processCollision((btCollisionObject*)processInfo.m_body0.getCollisionObject(),(btCollisionObject*)processInfo.m_body1.getCollisionObject(),processInfo.m_dispatchInfo,processInfo.m_result);
+}
+
 void btSoftRigidCollisionAlgorithm::processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
 {
 	(void)dispatchInfo;

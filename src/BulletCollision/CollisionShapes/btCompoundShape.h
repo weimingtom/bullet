@@ -144,7 +144,7 @@ public:
 	}
 
 
-	btDbvt*							getDynamicAabbTree()
+	const btDbvt* getDynamicAabbTree() const
 	{
 		return m_dynamicAabbTree;
 	}

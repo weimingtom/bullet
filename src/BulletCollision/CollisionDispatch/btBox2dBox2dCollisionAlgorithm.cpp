@@ -25,14 +25,14 @@ subject to the following restrictions:
 
 #define USE_PERSISTENT_CONTACTS 1
 
-btBox2dBox2dCollisionAlgorithm::btBox2dBox2dCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,btCollisionObject* obj0,btCollisionObject* obj1)
-: btActivatingCollisionAlgorithm(ci,obj0,obj1),
+btBox2dBox2dCollisionAlgorithm::btBox2dBox2dCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollider* body0,const btCollider* body1)
+: btActivatingCollisionAlgorithm(ci,body0,body1),
 m_ownManifold(false),
 m_manifoldPtr(mf)
 {
-	if (!m_manifoldPtr && m_dispatcher->needsCollision(obj0,obj1))
+	if (!m_manifoldPtr && m_dispatcher->needsCollision(body0->getCollisionObject(),body1->getCollisionObject()))
 	{
-		m_manifoldPtr = m_dispatcher->getNewManifold(obj0,obj1);
+		m_manifoldPtr = m_dispatcher->getNewManifold(body0->getCollisionObject(),body1->getCollisionObject());
 		m_ownManifold = true;
 	}
 }
@@ -52,24 +52,28 @@ btBox2dBox2dCollisionAlgorithm::~btBox2dBox2dCollisionAlgorithm()
 void b2CollidePolygons(btManifoldResult* manifold,  const btBox2dShape* polyA, const btTransform& xfA, const btBox2dShape* polyB, const btTransform& xfB);
 
 //#include <stdio.h>
-void btBox2dBox2dCollisionAlgorithm::processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btBox2dBox2dCollisionAlgorithm::processCollision (const btCollisionProcessInfo& processInfo)
 {
 	if (!m_manifoldPtr)
 		return;
 
-	btCollisionObject*	col0 = body0;
-	btCollisionObject*	col1 = body1;
-	btBox2dShape* box0 = (btBox2dShape*)col0->getCollisionShape();
-	btBox2dShape* box1 = (btBox2dShape*)col1->getCollisionShape();
+	btBox2dShape* box0 = (btBox2dShape*)processInfo.m_body0.getCollisionShape();
+	btBox2dShape* box1 = (btBox2dShape*)processInfo.m_body1.getCollisionShape();
 
-	resultOut->setPersistentManifold(m_manifoldPtr);
+	processInfo.m_result->setPersistentManifold(m_manifoldPtr);
 
-	b2CollidePolygons(resultOut,box0,col0->getWorldTransform(),box1,col1->getWorldTransform());
+	b2CollidePolygons(
+		processInfo.m_result,
+		box0,
+		processInfo.m_body0.getWorldTransform(),
+		box1,
+		processInfo.m_body1.getWorldTransform()
+	);
 
 	//  refreshContactPoints is only necessary when using persistent contact points. otherwise all points are newly added
 	if (m_ownManifold)
 	{
-		resultOut->refreshContactPoints();
+		processInfo.m_result->refreshContactPoints();
 	}
 
 }

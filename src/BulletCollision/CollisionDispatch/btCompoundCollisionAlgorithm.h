@@ -26,6 +26,7 @@ class btDispatcher;
 #include "btCollisionCreateFunc.h"
 #include "LinearMath/btAlignedObjectArray.h"
 class btDispatcher;
+struct btCollider;
 class btCollisionObject;
 
 /// btCompoundCollisionAlgorithm  supports collision between CompoundCollisionShapes and other collision shapes
@@ -41,15 +42,15 @@ class btCompoundCollisionAlgorithm  : public btActivatingCollisionAlgorithm
 	
 	void	removeChildAlgorithms();
 	
-	void	preallocateChildAlgorithms(btCollisionObject* body0,btCollisionObject* body1);
+	void	preallocateChildAlgorithms(btDispatcher* dispatcher, const btCollider& body0,const btCollider& body1);
 
 public:
 
-	btCompoundCollisionAlgorithm( const btCollisionAlgorithmConstructionInfo& ci,btCollisionObject* body0,btCollisionObject* body1,bool isSwapped);
+	btCompoundCollisionAlgorithm( const btCollisionAlgorithmConstructionInfo& ci,const btCollider* colObj0,const btCollider* colObj1,bool isSwapped);
 
 	virtual ~btCompoundCollisionAlgorithm();
 
-	virtual void processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
+	virtual void processCollision (const btCollisionProcessInfo& processInfo);
 
 	btScalar	calculateTimeOfImpact(btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
 
@@ -65,7 +66,7 @@ public:
 
 	struct CreateFunc :public 	btCollisionAlgorithmCreateFunc
 	{
-		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, btCollisionObject* body0,btCollisionObject* body1)
+		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollider* body0, const btCollider* body1)
 		{
 			void* mem = ci.m_dispatcher1->allocateCollisionAlgorithm(sizeof(btCompoundCollisionAlgorithm));
 			return new(mem) btCompoundCollisionAlgorithm(ci,body0,body1,false);
@@ -74,7 +75,7 @@ public:
 
 	struct SwappedCreateFunc :public 	btCollisionAlgorithmCreateFunc
 	{
-		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, btCollisionObject* body0,btCollisionObject* body1)
+		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollider* body0, const btCollider* body1)
 		{
 			void* mem = ci.m_dispatcher1->allocateCollisionAlgorithm(sizeof(btCompoundCollisionAlgorithm));
 			return new(mem) btCompoundCollisionAlgorithm(ci,body0,body1,true);

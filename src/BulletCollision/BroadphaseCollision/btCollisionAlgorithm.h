@@ -23,8 +23,10 @@ struct btBroadphaseProxy;
 class btDispatcher;
 class btManifoldResult;
 class btCollisionObject;
+class btCollisionShape;
 struct btDispatcherInfo;
-class	btPersistentManifold;
+class btPersistentManifold;
+class btTransform;
 
 typedef btAlignedObjectArray<btPersistentManifold*>	btManifoldArray;
 
@@ -48,6 +50,54 @@ struct btCollisionAlgorithmConstructionInfo
 
 };
 
+#define BT_DECLARE_STACK_ONLY_OBJECT \
+	private: \
+		void* operator new(size_t size); \
+		void operator delete(void*);
+
+struct btCollider;
+struct btCollider
+{
+BT_DECLARE_STACK_ONLY_OBJECT
+
+private:
+	btCollider(const btCollider&); // not implemented. Not allowed.
+	btCollider* operator=(const btCollider&);
+
+public:
+	const btCollider* m_parent;
+	const btCollisionShape* m_shape;
+	const btCollisionObject* m_collisionObject;
+	const btTransform& m_worldTransform;
+
+	btCollider(const btCollider* parent, const btCollisionShape* shape, const btCollisionObject* collisionObject, const btTransform& worldTransform)
+	: m_parent(parent), m_shape(shape), m_collisionObject(collisionObject), m_worldTransform(worldTransform)
+	{}
+
+	SIMD_FORCE_INLINE const btTransform& getWorldTransform() const { return m_worldTransform; }
+	SIMD_FORCE_INLINE const btCollisionObject* getCollisionObject() const { return m_collisionObject; }
+	SIMD_FORCE_INLINE const btCollisionShape* getCollisionShape() const { return m_shape; }
+};
+
+struct btCollisionProcessInfo
+{
+BT_DECLARE_STACK_ONLY_OBJECT
+
+private:
+	btCollisionProcessInfo(const btCollisionProcessInfo&); // not implemented. Not allowed.
+	btCollisionProcessInfo* operator=(const btCollisionProcessInfo&);
+
+public:
+	const btCollider& m_body0;
+	const btCollider& m_body1;
+	const btDispatcherInfo& m_dispatchInfo;
+	mutable btManifoldResult* m_result;
+	mutable btDispatcher* m_dispatcher;
+
+	btCollisionProcessInfo(const btCollider& body0, const btCollider& body1, const btDispatcherInfo& dispatchInfo, btManifoldResult* result, btDispatcher* dispatcher)
+	: m_body0(body0), m_body1(body1), m_dispatchInfo(dispatchInfo), m_result(result), m_dispatcher(dispatcher)
+	{}
+};
 
 ///btCollisionAlgorithm is an collision interface that is compatible with the Broadphase and btDispatcher.
 ///It is persistent over frames
@@ -69,7 +119,7 @@ public:
 
 	virtual ~btCollisionAlgorithm() {};
 
-	virtual void processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut) = 0;
+	virtual void processCollision (const btCollisionProcessInfo& processInfo) = 0;
 
 	virtual btScalar calculateTimeOfImpact(btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut) = 0;
 

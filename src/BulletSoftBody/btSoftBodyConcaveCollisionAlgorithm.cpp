@@ -120,10 +120,17 @@ void btSoftBodyTriangleCallback::processTriangle(btVector3* triangle,int partId,
 		btCollisionShape* tmpShape = ob->getCollisionShape();
 		ob->internalSetTemporaryCollisionShape( tm );
 
+		btTransform softTrans;
+		softTrans.setIdentity();
+		btCollider softCol(0,m_softBody->getCollisionShape(), m_softBody, softTrans);
+		btTransform triTrans;
+		triTrans.setIdentity();
+		btCollider triCol(0,tm,m_triBody,triTrans);
+		btCollisionProcessInfo processInfo(softCol,triCol,*m_dispatchInfoPtr,m_resultOut, m_dispatcher);
 
-		btCollisionAlgorithm* colAlgo = ci.m_dispatcher1->findAlgorithm(m_softBody,m_triBody,0);//m_manifoldPtr);
+		btCollisionAlgorithm* colAlgo = ci.m_dispatcher1->findAlgorithm(&softCol,&triCol,0);//m_manifoldPtr);
 
-		colAlgo->processCollision(m_softBody,m_triBody,*m_dispatchInfoPtr,m_resultOut);
+		colAlgo->processCollision(processInfo);
 		colAlgo->~btCollisionAlgorithm();
 		ci.m_dispatcher1->freeCollisionAlgorithm(colAlgo);
 		ob->internalSetTemporaryCollisionShape( tmpShape);
@@ -163,14 +170,22 @@ void btSoftBodyTriangleCallback::processTriangle(btVector3* triangle,int partId,
 		btCollisionShape* tmpShape = ob->getCollisionShape();
 		ob->internalSetTemporaryCollisionShape( tm );
 
+		btTransform softTrans;
+		softTrans.setIdentity();
+		btCollider softCol(0,m_softBody->getCollisionShape(), m_softBody, softTrans);
+		btTransform triTrans;
+		triTrans.setIdentity();
+		btCollider triCol(0,tm,m_triBody,triTrans);
+		btCollisionProcessInfo processInfo(softCol,triCol,*m_dispatchInfoPtr,m_resultOut, m_dispatcher);
 
-		btCollisionAlgorithm* colAlgo = ci.m_dispatcher1->findAlgorithm(m_softBody,m_triBody,0);//m_manifoldPtr);
+		btCollisionAlgorithm* colAlgo = ci.m_dispatcher1->findAlgorithm(&softCol,&triCol,0);//m_manifoldPtr);
+
 		///this should use the btDispatcher, so the actual registered algorithm is used
 		//		btConvexConvexAlgorithm cvxcvxalgo(m_manifoldPtr,ci,m_convexBody,m_triBody);
 
 		//m_resultOut->setShapeIdentifiersB(partId,triangleIndex);
 		//		cvxcvxalgo.processCollision(m_convexBody,m_triBody,*m_dispatchInfoPtr,m_resultOut);
-		colAlgo->processCollision(m_softBody,m_triBody,*m_dispatchInfoPtr,m_resultOut);
+		colAlgo->processCollision(processInfo);
 		colAlgo->~btCollisionAlgorithm();
 		ci.m_dispatcher1->freeCollisionAlgorithm(colAlgo);
 
@@ -212,6 +227,11 @@ void btSoftBodyConcaveCollisionAlgorithm::clearCache()
 {
 	m_btSoftBodyTriangleCallback.clearCache();
 
+}
+
+void btSoftBodyConcaveCollisionAlgorithm::processCollision (const btCollisionProcessInfo& processInfo)
+{
+	processCollision((btCollisionObject*)processInfo.m_body0.getCollisionObject(),(btCollisionObject*)processInfo.m_body1.getCollisionObject(),processInfo.m_dispatchInfo,processInfo.m_result);
 }
 
 void btSoftBodyConcaveCollisionAlgorithm::processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)

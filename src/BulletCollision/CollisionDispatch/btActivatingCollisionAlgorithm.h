@@ -18,6 +18,8 @@ subject to the following restrictions:
 
 #include "BulletCollision/BroadphaseCollision/btCollisionAlgorithm.h"
 
+struct btCollider;
+
 ///This class is not enabled yet (work-in-progress) to more aggressively activate objects.
 class btActivatingCollisionAlgorithm : public btCollisionAlgorithm
 {
@@ -28,7 +30,7 @@ public:
 
 	btActivatingCollisionAlgorithm (const btCollisionAlgorithmConstructionInfo& ci);
 
-	btActivatingCollisionAlgorithm (const btCollisionAlgorithmConstructionInfo& ci, btCollisionObject* colObj0,btCollisionObject* colObj1);
+	btActivatingCollisionAlgorithm (const btCollisionAlgorithmConstructionInfo& ci, const btCollider* colObj0,const btCollider* colObj1);
 
 	virtual ~btActivatingCollisionAlgorithm();
 

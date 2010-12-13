@@ -384,7 +384,8 @@ bool btGImpactQuantizedBvh::rayQuery(
 
 
 SIMD_FORCE_INLINE bool _quantized_node_collision(
-	btGImpactQuantizedBvh * boxset0, btGImpactQuantizedBvh * boxset1,
+	const btGImpactQuantizedBvh * boxset0,
+	const btGImpactQuantizedBvh * boxset1,
 	const BT_BOX_BOX_TRANSFORM_CACHE & trans_cache_1to0,
 	int node0 ,int node1, bool complete_primitive_tests)
 {
@@ -402,7 +403,8 @@ SIMD_FORCE_INLINE bool _quantized_node_collision(
 
 //stackless recursive collision routine
 static void _find_quantized_collision_pairs_recursive(
-	btGImpactQuantizedBvh * boxset0, btGImpactQuantizedBvh * boxset1,
+	const btGImpactQuantizedBvh * boxset0,
+	const btGImpactQuantizedBvh * boxset1,
 	btPairSet * collision_pairs,
 	const BT_BOX_BOX_TRANSFORM_CACHE & trans_cache_1to0,
 	int node0, int node1, bool complete_primitive_tests)
@@ -501,9 +503,10 @@ static void _find_quantized_collision_pairs_recursive(
 }
 
 
-void btGImpactQuantizedBvh::find_collision(btGImpactQuantizedBvh * boxset0, const btTransform & trans0,
-		btGImpactQuantizedBvh * boxset1, const btTransform & trans1,
-		btPairSet & collision_pairs)
+void btGImpactQuantizedBvh::find_collision(
+	const btGImpactQuantizedBvh * boxset0, const btTransform & trans0,
+	const btGImpactQuantizedBvh * boxset1, const btTransform & trans1,
+	btPairSet & collision_pairs)
 {
 
 	if(boxset0->getNodeCount()==0 || boxset1->getNodeCount()==0 ) return;

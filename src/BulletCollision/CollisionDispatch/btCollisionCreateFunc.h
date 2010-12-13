@@ -19,9 +19,9 @@ subject to the following restrictions:
 #include "LinearMath/btAlignedObjectArray.h"
 class btCollisionAlgorithm;
 class btCollisionObject;
-
+struct btCollider;
 struct btCollisionAlgorithmConstructionInfo;
-
+struct btCollider;
 ///Used by the btCollisionDispatcher to register and create instances for btCollisionAlgorithm
 struct btCollisionAlgorithmCreateFunc
 {
@@ -33,13 +33,7 @@ struct btCollisionAlgorithmCreateFunc
 	}
 	virtual ~btCollisionAlgorithmCreateFunc(){};
 
-	virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& , btCollisionObject* body0,btCollisionObject* body1)
-	{
-		
-		(void)body0;
-		(void)body1;
-		return 0;
-	}
+	virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& , const btCollider* body0,const btCollider* body1)=0;
 };
 #endif //COLLISION_CREATE_FUNC
 

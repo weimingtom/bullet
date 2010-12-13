@@ -357,10 +357,10 @@ void	ConcaveRaycastDemo::initPhysics()
 	m_collisionShapes.push_back(colShape);
 
 	{
-		for (int i=0;i<10;i++)
+		for (int i=0;i<100;i++)
 		{
 			//btCollisionShape* colShape = new btCapsuleShape(0.5,2.0);//boxShape = new btSphereShape(1.f);
-			startTransform.setOrigin(btVector3(2*i,10,1));
+			startTransform.setOrigin(btVector3(2*(i%10),(i/10)*2+10,1));
 			localCreateRigidBody(1, startTransform,colShape);
 		}
 	}

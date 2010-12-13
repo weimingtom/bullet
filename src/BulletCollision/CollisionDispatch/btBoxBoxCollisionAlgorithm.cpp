@@ -21,14 +21,14 @@ subject to the following restrictions:
 
 #define USE_PERSISTENT_CONTACTS 1
 
-btBoxBoxCollisionAlgorithm::btBoxBoxCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,btCollisionObject* obj0,btCollisionObject* obj1)
+btBoxBoxCollisionAlgorithm::btBoxBoxCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollider* obj0,const btCollider* obj1)
 : btActivatingCollisionAlgorithm(ci,obj0,obj1),
 m_ownManifold(false),
 m_manifoldPtr(mf)
 {
-	if (!m_manifoldPtr && m_dispatcher->needsCollision(obj0,obj1))
+	if (!m_manifoldPtr && m_dispatcher->needsCollision(obj0->getCollisionObject(),obj1->getCollisionObject()))
 	{
-		m_manifoldPtr = m_dispatcher->getNewManifold(obj0,obj1);
+		m_manifoldPtr = m_dispatcher->getNewManifold(obj0->getCollisionObject(),obj1->getCollisionObject());
 		m_ownManifold = true;
 	}
 }
@@ -42,37 +42,35 @@ btBoxBoxCollisionAlgorithm::~btBoxBoxCollisionAlgorithm()
 	}
 }
 
-void btBoxBoxCollisionAlgorithm::processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btBoxBoxCollisionAlgorithm::processCollision (const btCollisionProcessInfo& processInfo)
 {
 	if (!m_manifoldPtr)
 		return;
 
-	btCollisionObject*	col0 = body0;
-	btCollisionObject*	col1 = body1;
-	btBoxShape* box0 = (btBoxShape*)col0->getCollisionShape();
-	btBoxShape* box1 = (btBoxShape*)col1->getCollisionShape();
+	btBoxShape* box0 = (btBoxShape*)processInfo.m_body0.getCollisionShape();
+	btBoxShape* box1 = (btBoxShape*)processInfo.m_body1.getCollisionShape();
 
 
 
 	/// report a contact. internally this will be kept persistent, and contact reduction is done
-	resultOut->setPersistentManifold(m_manifoldPtr);
+	processInfo.m_result->setPersistentManifold(m_manifoldPtr);
 #ifndef USE_PERSISTENT_CONTACTS	
 	m_manifoldPtr->clearManifold();
 #endif //USE_PERSISTENT_CONTACTS
 
 	btDiscreteCollisionDetectorInterface::ClosestPointInput input;
 	input.m_maximumDistanceSquared = BT_LARGE_FLOAT;
-	input.m_transformA = body0->getWorldTransform();
-	input.m_transformB = body1->getWorldTransform();
+	input.m_transformA = processInfo.m_body0.getWorldTransform();
+	input.m_transformB = processInfo.m_body1.getWorldTransform();
 
-	btBoxBoxDetector detector(box0,box1);
-	detector.getClosestPoints(input,*resultOut,dispatchInfo.m_debugDraw);
+	btBoxBoxDetector detector(box0, box1);
+	detector.getClosestPoints(input, *processInfo.m_result, processInfo.m_dispatchInfo.m_debugDraw);
 
 #ifdef USE_PERSISTENT_CONTACTS
 	//  refreshContactPoints is only necessary when using persistent contact points. otherwise all points are newly added
 	if (m_ownManifold)
 	{
-		resultOut->refreshContactPoints();
+		processInfo.m_result->refreshContactPoints();
 	}
 #endif //USE_PERSISTENT_CONTACTS
 

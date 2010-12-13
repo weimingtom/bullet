@@ -319,7 +319,7 @@ struct	btDbvt
 	DBVT_PREFIX
 		void		collideTV(	const btDbvtNode* root,
 		const btDbvtVolume& volume,
-		DBVT_IPOLICY);
+		DBVT_IPOLICY) const;
 	///rayTest is a re-entrant ray test, and can be called in parallel as long as the btAlignedAlloc is thread-safe (uses locking etc)
 	///rayTest is slower than rayTestInternal, because it builds a local stack, using memory allocations, and it recomputes signs/rayDirectionInverses each time
 	DBVT_PREFIX
@@ -907,7 +907,7 @@ inline void		btDbvt::collideTT(	const btDbvtNode* root0,
 DBVT_PREFIX
 inline void		btDbvt::collideTV(	const btDbvtNode* root,
 								  const btDbvtVolume& vol,
-								  DBVT_IPOLICY)
+								  DBVT_IPOLICY) const
 {
 	DBVT_CHECKTYPE
 		if(root)

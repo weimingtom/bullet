@@ -30,7 +30,7 @@ struct SphereTriangleDetector : public btDiscreteCollisionDetectorInterface
 {
 	virtual void	getClosestPoints(const ClosestPointInput& input,Result& output,class btIDebugDraw* debugDraw,bool swapResults=false);
 
-	SphereTriangleDetector(btSphereShape* sphere,btTriangleShape* triangle, btScalar contactBreakingThreshold);
+	SphereTriangleDetector(const btSphereShape* sphere,const btTriangleShape* triangle, btScalar contactBreakingThreshold);
 
 	virtual ~SphereTriangleDetector() {};
 
@@ -42,8 +42,8 @@ private:
 	bool pointInTriangle(const btVector3 vertices[], const btVector3 &normal, btVector3 *p );
 	bool facecontains(const btVector3 &p,const btVector3* vertices,btVector3& normal);
 
-	btSphereShape* m_sphere;
-	btTriangleShape* m_triangle;
+	const btSphereShape* m_sphere;
+	const btTriangleShape* m_triangle;
 	btScalar	m_contactBreakingThreshold;
 	
 };

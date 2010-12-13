@@ -67,15 +67,12 @@ btCollisionDispatcher::~btCollisionDispatcher()
 {
 }
 
-btPersistentManifold*	btCollisionDispatcher::getNewManifold(void* b0,void* b1) 
+btPersistentManifold*	btCollisionDispatcher::getNewManifold(const btCollisionObject* body0,const btCollisionObject* body1) 
 { 
 	gNumManifold++;
 	
 	//btAssert(gNumManifold < 65535);
 	
-
-	btCollisionObject* body0 = (btCollisionObject*)b0;
-	btCollisionObject* body1 = (btCollisionObject*)b1;
 
 	//optional relative contact breaking threshold, turned on by default (use setDispatcherFlags to switch off feature for improved performance)
 	
@@ -135,7 +132,7 @@ void btCollisionDispatcher::releaseManifold(btPersistentManifold* manifold)
 
 	
 
-btCollisionAlgorithm* btCollisionDispatcher::findAlgorithm(btCollisionObject* body0,btCollisionObject* body1,btPersistentManifold* sharedManifold)
+btCollisionAlgorithm* btCollisionDispatcher::findAlgorithm(const btCollider* body0,const btCollider* body1,btPersistentManifold* sharedManifold)
 {
 	
 	btCollisionAlgorithmConstructionInfo ci;
@@ -150,7 +147,7 @@ btCollisionAlgorithm* btCollisionDispatcher::findAlgorithm(btCollisionObject* bo
 
 
 
-bool	btCollisionDispatcher::needsResponse(btCollisionObject* body0,btCollisionObject* body1)
+bool	btCollisionDispatcher::needsResponse(const btCollisionObject* body0,const btCollisionObject* body1)
 {
 	//here you can do filtering
 	bool hasResponse = 
@@ -161,7 +158,7 @@ bool	btCollisionDispatcher::needsResponse(btCollisionObject* body0,btCollisionOb
 	return hasResponse;
 }
 
-bool	btCollisionDispatcher::needsCollision(btCollisionObject* body0,btCollisionObject* body1)
+bool	btCollisionDispatcher::needsCollision(const btCollisionObject* body0,const btCollisionObject* body1)
 {
 	btAssert(body0);
 	btAssert(body1);
@@ -252,10 +249,13 @@ void btCollisionDispatcher::defaultNearCallback(btBroadphasePair& collisionPair,
 
 		if (dispatcher.needsCollision(colObj0,colObj1))
 		{
+			btCollider collider0(0, colObj0->getCollisionShape(), colObj0, colObj0->getWorldTransform());
+			btCollider collider1(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform());
+
 			//dispatcher will keep algorithms persistent in the collision pair
 			if (!collisionPair.m_algorithm)
 			{
-				collisionPair.m_algorithm = dispatcher.findAlgorithm(colObj0,colObj1);
+				collisionPair.m_algorithm = dispatcher.findAlgorithm(&collider0, &collider1);
 			}
 
 			if (collisionPair.m_algorithm)
@@ -265,8 +265,10 @@ void btCollisionDispatcher::defaultNearCallback(btBroadphasePair& collisionPair,
 				if (dispatchInfo.m_dispatchFunc == 		btDispatcherInfo::DISPATCH_DISCRETE)
 				{
 					//discrete collision detection query
-					collisionPair.m_algorithm->processCollision(colObj0,colObj1,dispatchInfo,&contactPointResult);
-				} else
+					btCollisionProcessInfo processInfo(collider0, collider1, dispatchInfo, &contactPointResult, &dispatcher);
+					collisionPair.m_algorithm->processCollision(processInfo);
+				}
+				else
 				{
 					//continuous collision detection query, time of impact (toi)
 					btScalar toi = collisionPair.m_algorithm->calculateTimeOfImpact(colObj0,colObj1,dispatchInfo,&contactPointResult);

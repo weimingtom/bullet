@@ -35,7 +35,7 @@ class btHfFluidRigidCollisionAlgorithm : public btCollisionAlgorithm
 {
 	btPersistentManifold*	m_manifoldPtr;
 
-	btHfFluid*				m_hfFluid;
+	const btHfFluid*				m_hfFluid;
 	btCollisionObject*		m_rigidCollisionObject;
 
 	///for rigid versus fluid (instead of fluid versus rigid), we use this swapped boolean
@@ -48,9 +48,11 @@ class btHfFluidRigidCollisionAlgorithm : public btCollisionAlgorithm
 	btScalar processFluid (const btDispatcherInfo& dispatchInfo, btScalar density, btScalar floatyness);
 public:
 
-	btHfFluidRigidCollisionAlgorithm(const btCollisionAlgorithmConstructionInfo& ci,btCollisionObject* col0,btCollisionObject* col1, bool isSwapped);
+	btHfFluidRigidCollisionAlgorithm(const btCollisionAlgorithmConstructionInfo& ci,const btCollider* col0,const btCollider* col1, bool isSwapped);
 
 	virtual ~btHfFluidRigidCollisionAlgorithm();
+
+	virtual void processCollision (const btCollisionProcessInfo& processInfo);
 
 	virtual void processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
 
@@ -64,7 +66,7 @@ public:
 
 	struct CreateFunc :public 	btCollisionAlgorithmCreateFunc
 	{
-		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, btCollisionObject* body0,btCollisionObject* body1)
+		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollider* body0,const btCollider* body1)
 		{
 			void* mem = ci.m_dispatcher1->allocateCollisionAlgorithm(sizeof(btHfFluidRigidCollisionAlgorithm));
 			if (!m_swapped)
