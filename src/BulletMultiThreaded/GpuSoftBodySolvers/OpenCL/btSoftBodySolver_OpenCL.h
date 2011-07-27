@@ -30,31 +30,19 @@ class CLFunctions
 protected:
 	cl_command_queue	m_cqCommandQue;
 	cl_context			m_cxMainContext;
-
-	int	m_kernelCompilationFailures;
-
+	
 public:
 	CLFunctions(cl_command_queue cqCommandQue, cl_context cxMainContext) :
 		m_cqCommandQue( cqCommandQue ),
-		m_cxMainContext( cxMainContext ),
-		m_kernelCompilationFailures(0)
+		m_cxMainContext( cxMainContext )
 	{
 	}
 
-	int getKernelCompilationFailures() const
-	{
-		return m_kernelCompilationFailures;
-	}
 
 	/**
 	 * Compile a compute shader kernel from a string and return the appropriate cl_kernel object.
 	 */	
 	cl_kernel compileCLKernelFromString( const char* kernelSource, const char* kernelName, const char* additionalMacros = "" );
-
-	void	clearKernelCompilationFailures()
-	{
-		m_kernelCompilationFailures=0;
-	}
 };
 
 /**
@@ -285,7 +273,7 @@ public:
 
 protected:
 
-	CLFunctions m_clFunctions;
+	CLFunctions clFunctions;
 
 	/** Variable to define whether we need to update solver constants on the next iteration */
 	bool m_updateSolverConstants;
@@ -352,22 +340,22 @@ protected:
 
 
 
-	cl_kernel		m_prepareLinksKernel;
-	cl_kernel		m_solvePositionsFromLinksKernel;
-	cl_kernel		m_updateConstantsKernel;
-	cl_kernel		m_integrateKernel;
-	cl_kernel		m_addVelocityKernel;
-	cl_kernel		m_updatePositionsFromVelocitiesKernel;
-	cl_kernel		m_updateVelocitiesFromPositionsWithoutVelocitiesKernel;
-	cl_kernel		m_updateVelocitiesFromPositionsWithVelocitiesKernel;
-	cl_kernel		m_vSolveLinksKernel;
-	cl_kernel		m_solveCollisionsAndUpdateVelocitiesKernel;
-	cl_kernel		m_resetNormalsAndAreasKernel;
-	cl_kernel		m_normalizeNormalsAndAreasKernel;
-	cl_kernel		m_updateSoftBodiesKernel;
+	cl_kernel		prepareLinksKernel;
+	cl_kernel		solvePositionsFromLinksKernel;
+	cl_kernel		updateConstantsKernel;
+	cl_kernel		integrateKernel;
+	cl_kernel		addVelocityKernel;
+	cl_kernel		updatePositionsFromVelocitiesKernel;
+	cl_kernel		updateVelocitiesFromPositionsWithoutVelocitiesKernel;
+	cl_kernel		updateVelocitiesFromPositionsWithVelocitiesKernel;
+	cl_kernel		vSolveLinksKernel;
+	cl_kernel		solveCollisionsAndUpdateVelocitiesKernel;
+	cl_kernel		resetNormalsAndAreasKernel;
+	cl_kernel		normalizeNormalsAndAreasKernel;
+	cl_kernel		updateSoftBodiesKernel;
 
-	cl_kernel		m_outputToVertexArrayKernel;
-	cl_kernel		m_applyForcesKernel;
+	cl_kernel		outputToVertexArrayKernel;
+	cl_kernel		applyForcesKernel;
 
 	cl_command_queue	m_cqCommandQue;
 	cl_context			m_cxMainContext;

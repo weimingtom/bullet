@@ -495,12 +495,6 @@ void initBullet(void)
 
 
 	g_solver->optimize( m_dynamicsWorld->getSoftBodyArray() );
-	
-	if (!g_solver->checkInitialized())
-	{
-		printf("OpenCL kernel initialization ?failed\n");
-		exit(0);
-	}
 
 }
 

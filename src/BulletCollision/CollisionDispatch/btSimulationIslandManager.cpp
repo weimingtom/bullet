@@ -47,8 +47,6 @@ void btSimulationIslandManager::findUnions(btDispatcher* /* dispatcher */,btColl
 	{
 		btOverlappingPairCache* pairCachePtr = colWorld->getPairCache();
 		const int numOverlappingPairs = pairCachePtr->getNumOverlappingPairs();
-		if (numOverlappingPairs)
-		{
 		btBroadphasePair* pairPtr = pairCachePtr->getOverlappingPairArrayPtr();
 		
 		for (int i=0;i<numOverlappingPairs;i++)
@@ -64,7 +62,6 @@ void btSimulationIslandManager::findUnions(btDispatcher* /* dispatcher */,btColl
 				m_unionFind.unite((colObj0)->getIslandTag(),
 					(colObj1)->getIslandTag());
 			}
-		}
 		}
 	}
 }

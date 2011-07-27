@@ -21,12 +21,6 @@ subject to the following restrictions:
 #include "BulletMultiThreaded/Win32ThreadSupport.h"
 #endif
 
-#include "BulletMultiThreaded/PlatformDefinitions.h"
-#ifdef USE_PTHREADS
-#include "BulletMultiThreaded/PosixThreadSupport.h"
-#endif
-
-
 #include "BulletMultiThreaded/SequentialThreadSupport.h"
 #include "MiniCLTaskScheduler.h"
 #include "MiniCLTask/MiniCLTask.h"
@@ -667,19 +661,9 @@ CL_API_ENTRY cl_context CL_API_CALL clCreateContextFromType(cl_context_propertie
 								createMiniCLLocalStoreMemory,//createCollisionLocalStoreMemory,
 								maxNumOutstandingTasks));
 #else
-
-#ifdef USE_PTHREADS
-		PosixThreadSupport::ThreadConstructionInfo constructionInfo("PosixThreads",
-																	processMiniCLTask,
-																	createMiniCLLocalStoreMemory,
-																	maxNumOutstandingTasks);
-		threadSupport = new PosixThreadSupport(constructionInfo);
-
-#else
 	///todo: add posix thread support for other platforms
 	SequentialThreadSupport::SequentialThreadConstructionInfo stc("MiniCL",processMiniCLTask,createMiniCLLocalStoreMemory);
 	threadSupport = new SequentialThreadSupport(stc);
-#endif //USE_PTHREADS
 #endif
 
 	}
@@ -711,15 +695,6 @@ clFinish(cl_command_queue command_queue ) CL_API_SUFFIX__VERSION_1_0
 	return CL_SUCCESS;
 }
 
-extern CL_API_ENTRY cl_int CL_API_CALL 
-clGetProgramInfo(cl_program         /* program */,
-                 cl_program_info    /* param_name */,
-                 size_t             /* param_value_size */,
-                 void *             /* param_value */,
-                 size_t *           /* param_value_size_ret */) CL_API_SUFFIX__VERSION_1_0
-{
-   return 0;
-}
 
 extern CL_API_ENTRY cl_int CL_API_CALL
 clGetKernelWorkGroupInfo(cl_kernel                   kernel ,

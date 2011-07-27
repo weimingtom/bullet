@@ -14,7 +14,6 @@ SET(GLUT_ROOT ${BULLET_PHYSICS_SOURCE_DIR}/Glut)
 INCLUDE_DIRECTORIES(
 ${BULLET_PHYSICS_SOURCE_DIR}/src 
 ${BULLET_PHYSICS_SOURCE_DIR}/Demos/OpenGL 
-${BULLET_PHYSICS_SOURCE_DIR}/Extras/HACD
 ${BULLET_PHYSICS_SOURCE_DIR}/Extras/ConvexDecomposition
 ${BULLET_PHYSICS_SOURCE_DIR}/Extras/Serialize/BulletFileLoader
 ${BULLET_PHYSICS_SOURCE_DIR}/Extras/Serialize/BulletWorldImporter
@@ -23,7 +22,7 @@ ${BULLET_PHYSICS_SOURCE_DIR}/Extras/Serialize/BulletWorldImporter
 IF (USE_GLUT)
 
 	LINK_LIBRARIES(
-	OpenGLSupport  BulletWorldImporter  BulletDynamics  BulletCollision LinearMath  BulletFileLoader HACD ConvexDecomposition ${GLUT_glut_LIBRARY} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
+	OpenGLSupport  BulletWorldImporter  BulletDynamics  BulletCollision LinearMath  BulletFileLoader ConvexDecomposition ${GLUT_glut_LIBRARY} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
 	)
 
 	ADD_EXECUTABLE(AppConvexDecompositionDemo
@@ -51,7 +50,7 @@ IF (USE_GLUT)
 ELSE (USE_GLUT)
 
 LINK_LIBRARIES(
-	OpenGLSupport  BulletWorldImporter BulletDynamics  BulletCollision LinearMath  BulletFileLoader HACD ConvexDecomposition ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
+	OpenGLSupport  BulletWorldImporter BulletDynamics  BulletCollision LinearMath  BulletFileLoader ConvexDecomposition ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
 	)
 
 	ADD_EXECUTABLE(AppConvexDecompositionDemo
